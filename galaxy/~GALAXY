@@ -1,0 +1,181 @@
+#Program name: ~GALAXY
+#Password: <no password>
+ClrText
+RclV-Win 1
+'Player and Bullet Position Reset
+5 -> A
+4 -> B
+0 -> P
+{0, 21, 6} -> List 1
+'Pause screen
+Lbl 2
+P = 0 => Goto 1
+Locate 1, 1, "Ξ"
+Locate 3, 1, List 2[1]
+Locate 5, 3, "▸ GAME PAUSED"
+Locate 4, 4, "【EXIT】 to resume"
+GetKey -> D
+D = 47 => 0 -> P
+D = 47 => ClrText
+Goto 2
+'Gameloop
+Lbl 1
+'Display scores and other
+Locate 15, 7, Str 3
+Locate 1, 2, "≡"
+Locate 1, 3, ""
+Locate 1, 4, ""
+Locate 1, 5, ""
+Locate 1, 6, "≡"
+'Move Player on Keypress
+GetKey -> D
+D = 27 And A < 10 => A + 1 -> A
+D = 28 And B > 1 => B - 1 -> B
+D = 37 And B < 7 => B + 1 -> B
+D = 38 And A > 1 => A - 1 -> A
+'Check if to move\shoot bullet
+If D = 78 :Then
+	'Delete bullet
+	Locate List 1[2], List 1[3], " "
+	{0, 20, 6} -> List 1
+	1 -> List 1[1] : A -> List 1[2] : B -> List 1[3]
+IfEnd
+'Check for pause
+If D = 48 : Then 1 -> P
+	Goto 2
+IfEnd
+'Check for platform
+A = 1 And B > 1 And B < 7 => ClrText
+A = 1 And B > 1 And B < 7 => Prog "~GPLAT"
+'Place Player on Screen
+"ф" -> Str 1
+If List 2[2] > 0 : Then List 2[2] = 1 => "⇔" -> Str 1
+	List 2[2] = 2 => "Σ" -> Str 1
+	List 2[2] = 3 => "Ф" -> Str 1
+	List 2[2] = 4 => "Є" -> Str 1
+	List 2[2] = 5 => "§" -> Str 1
+IfEnd
+Locate A, B, Str 1
+'Clear Player Pixels
+B < 7 => Locate A, B + 1, " "
+A > 1 => Locate A - 1, B, " "
+B > 1 => Locate A, B - 1, " "
+A < 21 => Locate A + 1, B, " "
+'Check to summon meteor
+If RanInt#(1, 4) = 4 :Then
+	For 1 -> F To 8
+		'Check if meteor is already taking slot
+		If Mat M[1, F] = 0 :Then
+			'If not, create new meteor
+			1 -> Mat M[1, F]
+			21 -> Mat M[2, F]
+			RanInt#(1, 7) -> Mat M[3, F]
+			RanInt#(1, 100) -> T
+			T <= 50 => 1 -> Mat M[4, F]
+			T >= 51 And T <= 75 => 2 -> Mat M[4, F]
+			T >= 76 And T <= 99 => 3 -> Mat M[4, F]
+			T = 100 => 4 -> Mat M[4, F]
+			Mat M[4, F] = 1 => 30 -> Mat M[5, F]
+			Mat M[4, F] = 2 => 80 -> Mat M[5, F]
+			Mat M[4, F] = 3 => 225 -> Mat M[5, F]
+			Mat M[4, F] = 4 => 3000 -> Mat M[5, F]
+			Mat M[4, F] = 1 => 2 -> Mat M[6, F]
+			Mat M[4, F] = 2 => 3 -> Mat M[6, F]
+			Mat M[4, F] = 3 => 5 -> Mat M[6, F]
+			Mat M[4, F] = 4 => 10 -> Mat M[6, F]
+			'Escape out of loop
+			Goto 9
+		IfEnd
+	Next
+IfEnd
+Lbl 9
+'Check to move bullet
+List 1[2] >= 21 => 0 -> List 1[1]
+List 1[2] >= 21 => Locate List 1[2], List 1[3], " "
+If List 1[1] = 1 :Then
+	'Move and place bullet on screen
+	List 1[2] + 1 -> List 1[2]
+	"·" -> Str 2
+	If List 2[3] >= 1 : Then List 2[3] = 1 => "▪" -> Str 2
+		List 2[3] = 2 => "▫" -> Str 2
+		List 2[3] = 3 => "⊗" -> Str 2
+		List 2[3] = 4 => "■" -> Str 2
+		List 2[3] = 5 => "□" -> Str 2
+		List 2[3] = 6 => "∞" -> Str 2
+		List 2[3] = 7 => "⊠" -> Str 2
+		List 2[3] = 8 => "»" -> Str 2
+	IfEnd
+	Locate List 1[2], List 1[3], Str 2
+	List 1[2] > 2 => Locate List 1[2] - 1, List 1[3], " "
+IfEnd
+'Check for meteors and render
+For 1 -> H To 8
+	If Mat M[1, H] = 1 :Then
+		'Move meteor
+		Mat M[6, H] - 1 -> Mat M[6, H]
+		If Mat M[4, H] = 1 And Mat M[6, H] = 0 : Then Mat M[2, H] - 1 -> Mat M[2, H]
+			2 -> Mat M[6, H]
+		IfEnd
+		If Mat M[4, H] = 2 And Mat M[6, H] = 0 : Then Mat M[2, H] - 1 -> Mat M[2, H]
+			3 -> Mat M[6, H]
+		IfEnd
+		If Mat M[4, H] = 3 And Mat M[6, H] = 0 : Then Mat M[2, H] - 1 -> Mat M[2, H]
+			5 -> Mat M[6, H]
+		IfEnd
+		If Mat M[4, H] = 4 And Mat M[6, H] = 0 : Then Mat M[2, H] - 1 -> Mat M[2, H]
+			10 -> Mat M[6, H]
+		IfEnd
+		'Reset meteor if OOB
+		If Mat M[2, H] < 1 :Then
+			0 -> Mat M[1, H]
+			21 -> Mat M[2, H]
+			'Clear
+			Locate 1, Mat M[3, H], " "
+			Locate 21, Mat M[3, H], " "
+		IfEnd
+		'Clear pixels
+		Mat M[2, H] < 21 => Locate Mat M[2, H] + 1, Mat M[3, H], " "
+		'Place meteor
+		Mat M[4, H] = 1 => Locate Mat M[2, H], Mat M[3, H], "⨯"
+		Mat M[4, H] = 2 => Locate Mat M[2, H], Mat M[3, H], ""
+		Mat M[4, H] = 3 => Locate Mat M[2, H], Mat M[3, H], "⋇"
+		Mat M[4, H] = 4 => Locate Mat M[2, H], Mat M[3, H], "@"
+		'Check if collided with player
+		If Mat M[2, H] = A And Mat M[3, H] = B : Then 'Reduce HP
+			StrCmp(Str 3, "【◇◆◆】") = 0 => Prog "~GMENU"
+			StrCmp(Str 3, "【◇◇◆】") = 0 => "【◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇】") = 0 => "【◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◆◆◆】") = 0 => Prog "~GMENU"
+			StrCmp(Str 3, "【◇◇◆◆】") = 0 => "【◇◆◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◆】") = 0 => "【◇◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◇】") = 0 => "【◇◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◆◆◆◆】") = 0 => Prog "~GMENU"
+			StrCmp(Str 3, "【◇◇◆◆◆】") = 0 => "【◇◆◆◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◆◆】") = 0 => "【◇◇◆◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◇◆】") = 0 => "【◇◇◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◇◇】") = 0 => "【◇◇◇◇◆】" -> Str 3
+		IfEnd
+		'Check if collided with bullet
+		If List 1[1] = 1 : Then If Mat M[2, H] = List 1[2] And Mat M[3, H] = List 1[3] Or Mat M[2, H] = List 1[2] - 1 And Mat M[3, H] = List 1[3] : Then 
+				RndFix(Mat M[5, H] - (List 2[5] + (List 2[5] * List 2[7] * 0.1)), 0) -> Mat M[5, H]
+				'Delete bullet
+				0 -> List 1[1]
+				Locate List 1[2], List 1[3], "¤"
+				If Mat M[5, H] <= 0 : Then 'Clear\reset meteor
+					Locate Mat M[2, H], Mat M[3, H], " "
+					0 -> Mat M[1, H]
+					'Score
+					List 2[1] + 1 -> List 2[1]
+					50 -> V
+					Mat M[4, H] = 2 => 140 -> V
+					Mat M[4, H] = 3 => 450 -> V
+					Mat M[4, H] = 4 => 1500 -> V
+					RndFix(V + (V * List 2[8] * 0.25), 0) -> V
+					List 2[4] + V -> List 2[4]
+					Locate List 1[2], List 1[3], " "
+				IfEnd
+			IfEnd
+		IfEnd
+	IfEnd
+Next
+Goto 1

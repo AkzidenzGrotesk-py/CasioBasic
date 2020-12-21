@@ -1,0 +1,631 @@
+#Program name: ~GALAXY
+#Password: <no password>
+ClrText
+RclV-Win 1
+
+'Player and Bullet Position Reset
+5 -> A
+4 -> B
+0 -> P
+{0, 21, 6} -> List 1
+
+'Pause screen
+Lbl 2
+P = 0 => Goto 1
+Locate 1, 1, "Ξ"
+Locate 3, 1, List 2[1]
+Locate 5, 3, "▸ GAME PAUSED"
+Locate 4, 4, "【EXIT】 to resume"
+GetKey -> D
+
+D = 47 => 0 -> P
+D = 47 => ClrText
+
+Goto 2
+
+'Gameloop
+Lbl 1
+
+'Display scores and other
+Locate 15, 7, Str 3
+Locate 1, 2, "≡"
+Locate 1, 3, ""
+Locate 1, 4, ""
+Locate 1, 5, ""
+Locate 1, 6, "≡"
+
+'Move Player on Keypress
+GetKey -> D
+D = 27 And A < 10 => A + 1 -> A
+D = 28 And B > 1 => B - 1 -> B
+D = 37 And B < 7 => B + 1 -> B
+D = 38 And A > 1 => A - 1 -> A
+
+'Check if to move\shoot bullet
+If D = 78 :Then
+	'Delete bullet	
+	Locate List 1[2], List 1[3], " "
+	{0, 20, 6} -> List 1
+	1 -> List 1[1] : A -> List 1[2] : B -> List 1[3]
+IfEnd
+
+'Check for pause
+If D = 48 : Then 
+	1 -> P
+	Goto 2
+IfEnd
+
+'Check for platform
+A = 1 And B > 1 And B < 7 => ClrText
+A = 1 And B > 1 And B < 7 => Prog "~GPLAT"
+
+'Place Player on Screen
+"ф" -> Str 1
+If List 2[2] > 0 : Then
+	List 2[2] = 1 => "⇔" -> Str 1
+	List 2[2] = 2 => "Σ" -> Str 1
+	List 2[2] = 3 => "Ф" -> Str 1
+	List 2[2] = 4 => "Є" -> Str 1
+	List 2[2] = 5 => "§" -> Str 1
+
+IfEnd
+Locate A, B, Str 1
+
+'Clear Player Pixels
+B < 7 => Locate A, B + 1, " "
+A > 1 => Locate A - 1, B, " "
+B > 1 => Locate A, B - 1, " "
+A < 21 => Locate A + 1, B, " "
+
+'Check to summon meteor
+If RanInt#(1, 4) = 4 :Then
+	For 1 -> F To 8
+		'Check if meteor is already taking slot
+		If Mat M[1, F] = 0 :Then
+			'If not, create new meteor
+			1 -> Mat M[1, F]
+			21 -> Mat M[2, F]
+			RanInt#(1, 7) -> Mat M[3, F]
+			RanInt#(1, 100) -> T
+			
+			T <= 50 => 1 -> Mat M[4, F]
+			T >= 51 And T <= 75 => 2 -> Mat M[4, F]
+			T >= 76 And T <= 99 => 3 -> Mat M[4, F]
+			T = 100 => 4 -> Mat M[4, F]
+			
+			Mat M[4, F] = 1 => 30 -> Mat M[5, F]
+			Mat M[4, F] = 2 => 80 -> Mat M[5, F]
+			Mat M[4, F] = 3 => 225 -> Mat M[5, F]
+			Mat M[4, F] = 4 => 3000 -> Mat M[5, F]
+
+			Mat M[4, F] = 1 => 2 -> Mat M[6, F]
+			Mat M[4, F] = 2 => 3 -> Mat M[6, F]
+			Mat M[4, F] = 3 => 5 -> Mat M[6, F]
+			Mat M[4, F] = 4 => 10 -> Mat M[6, F]
+			'Escape out of loop
+			Goto 9
+		IfEnd
+	Next
+IfEnd
+
+Lbl 9
+
+'Check to move bullet
+List 1[2] >= 21 => 0 -> List 1[1]
+List 1[2] >= 21 => Locate List 1[2], List 1[3], " "
+If List 1[1] = 1 :Then
+	'Move and place bullet on screen
+	List 1[2] + 1 -> List 1[2]
+	
+	"·" -> Str 2
+	If List 2[3] >= 1 : Then
+		List 2[3] = 1 => "▪" -> Str 2
+		List 2[3] = 2 => "▫" -> Str 2
+		List 2[3] = 3 => "⊗" -> Str 2
+		List 2[3] = 4 => "■" -> Str 2
+		List 2[3] = 5 => "□" -> Str 2
+		List 2[3] = 6 => "∞" -> Str 2
+		List 2[3] = 7 => "⊠" -> Str 2
+		List 2[3] = 8 => "»" -> Str 2
+	IfEnd
+	
+	Locate List 1[2], List 1[3], Str 2
+	List 1[2] > 2 => Locate List 1[2] - 1, List 1[3], " "
+	
+IfEnd
+
+
+'Check for meteors and render
+For 1 -> H To 8
+	If Mat M[1, H] = 1 :Then
+		'Move meteor
+		Mat M[6, H] - 1 -> Mat M[6, H]
+		If Mat M[4, H] = 1 And Mat M[6, H] = 0 : Then 
+			Mat M[2, H] - 1 -> Mat M[2, H] 
+			2 -> Mat M[6, H]
+		IfEnd
+		If Mat M[4, H] = 2 And Mat M[6, H] = 0 : Then 
+			Mat M[2, H] - 1 -> Mat M[2, H]
+			3 -> Mat M[6, H]
+		IfEnd
+		If Mat M[4, H] = 3 And Mat M[6, H] = 0 : Then 
+			Mat M[2, H] - 1 -> Mat M[2, H]
+			5 -> Mat M[6, H]
+		IfEnd
+		If Mat M[4, H] = 4 And Mat M[6, H] = 0 : Then 
+			Mat M[2, H] - 1 -> Mat M[2, H]
+			10 -> Mat M[6, H]
+		IfEnd
+		
+		'Reset meteor if OOB
+		If Mat M[2, H] < 1 :Then
+			0 -> Mat M[1, H]
+			21 -> Mat M[2, H]
+			'Clear
+			Locate 1, Mat M[3, H], " "
+			Locate 21, Mat M[3, H], " "
+		IfEnd
+		'Clear pixels
+		Mat M[2, H] < 21 => Locate Mat M[2, H] + 1, Mat M[3, H], " "
+		'Place meteor
+		Mat M[4, H] = 1 => Locate Mat M[2, H], Mat M[3, H], "⨯"
+		Mat M[4, H] = 2 => Locate Mat M[2, H], Mat M[3, H], ""
+		Mat M[4, H] = 3 => Locate Mat M[2, H], Mat M[3, H], "⋇"
+		Mat M[4, H] = 4 => Locate Mat M[2, H], Mat M[3, H], "@"
+
+		'Check if collided with player
+		If Mat M[2, H] = A And Mat M[3, H] = B : Then
+			'Reduce HP
+			StrCmp(Str 3, "【◇◆◆】") = 0 => Prog "~GMENU"
+			StrCmp(Str 3, "【◇◇◆】") = 0 => "【◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇】") = 0 => "【◇◇◆】" -> Str 3
+
+			StrCmp(Str 3, "【◇◆◆◆】") = 0 => Prog "~GMENU"
+			StrCmp(Str 3, "【◇◇◆◆】") = 0 => "【◇◆◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◆】") = 0 => "【◇◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◇】") = 0 => "【◇◇◇◆】" -> Str 3
+
+			StrCmp(Str 3, "【◇◆◆◆◆】") = 0 => Prog "~GMENU"
+			StrCmp(Str 3, "【◇◇◆◆◆】") = 0 => "【◇◆◆◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◆◆】") = 0 => "【◇◇◆◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◇◆】") = 0 => "【◇◇◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◇◇】") = 0 => "【◇◇◇◇◆】" -> Str 3
+
+		IfEnd
+
+		'Check if collided with bullet
+		If List 1[1] = 1: Then 
+			If Mat M[2, H] = List 1[2] And Mat M[3, H] = List 1[3] Or Mat M[2, H] = List 1[2] - 1 And Mat M[3, H] = List 1[3]: Then 			
+				RndFix(Mat M[5, H] - (List 2[5] + (List 2[5] * List 2[7] * 0.1)), 0) -> Mat M[5, H]
+				'Delete bullet
+				0 -> List 1[1]
+				Locate List 1[2], List 1[3], "¤"
+
+				If Mat M[5, H] <= 0 : Then
+					'Clear\reset meteor
+					Locate Mat M[2, H], Mat M[3, H], " "
+					0 -> Mat M[1, H]
+	
+					'Score
+					List 2[1] + 1 -> List 2[1]
+					100 -> V
+					Mat M[4, H] = 2 => 280 -> V
+					Mat M[4, H] = 3 => 900 -> V
+					Mat M[4, H] = 4 => 3100 -> V
+					RndFix(V + (V * List 2[8] * 0.25), 0) -> V
+
+					List 2[4] + V -> List 2[4]
+					Locate List 1[2], List 1[3], " "
+				IfEnd
+			IfEnd
+		IfEnd
+	IfEnd
+Next
+
+Goto 1
+#End of part
+#Program name: ~GMENU
+#Password: <no password>
+
+ClrText
+RclV-Win 1
+
+0 -> M
+
+Lbl 1
+
+Locate 6, 1, "⇔  ▫    "
+Locate 6, 2, "GALAXY SHOT"
+Locate 4, 3, "≡ How to Play"
+Locate 4, 4, "⇔ New Game"
+Locate 4, 5, "@ Reload Save"
+Locate 4, 6, "* Quit"
+Locate 2, 7, "Use ▷ to select."
+Locate 2, M+3, "↔"
+
+GetKey -> Z
+Z = 28 And M > 0 => M - 1 -> M
+Z = 37 And M < 3 => M + 1 -> M
+Z != 0 => ClrText
+If Z = 27 : Then
+	M = 0 => ClrText
+	M = 0 => Goto 3
+	If M = 1 : Then
+		"【◇◇◇】" -> Str 3
+		{6, 8} -> Dim Mat M
+		Fill(0, Mat M)
+		'Score, Ship Display, Bullet Display, Money, Bullet Damage, Bonus HP, Damage + 10%, Money Multiplier
+		{0, 0, 0, 1000, 10, 0, 0, 0} -> List 2
+		Prog "~GALAXY"
+	IfEnd
+	M = 2 => Prog "~GALAXY"
+	M = 3 => Stop
+IfEnd
+
+Goto 1
+
+Lbl 3
+Locate 1, 1, "+===-H T P-===+"
+Locate 1, 2, "    Game Controls    "
+Locate 1, 3, "⋇ ARROWS to move ship"
+Locate 1, 4, "  ▲ SHIFT to shoot.  "
+Locate 1, 5, "   ≡ MENU to pause.  "
+Locate 1, 6, " ▷ RIGHT to use menu "
+Locate 1, 7, "+===------*------⋇ F1"
+GetKey = 79 => ClrText
+GetKey = 79 => Goto 4
+Goto 3
+Lbl 4
+Locate 1, 1, "+===-H T P-===+"
+Locate 1, 2, "You have one shot,   "
+Locate 1, 3, "which will return if "
+Locate 1, 4, "it hits a target or  "
+Locate 1, 5, "you shoot again.     "
+Locate 1, 6, "Default bullet -> ·  "
+Locate 1, 7, "+===------*------⋇ F2"
+GetKey = 69 => ClrText
+GetKey = 69 => Goto 5
+Goto 4
+
+Lbl 5
+Locate 1, 1, "+===-H T P-===+"
+Locate 1, 2, "You cannot go too far"
+Locate 1, 3, "from the platform.   "
+Locate 1, 4, "Return to platform to"
+Locate 1, 5, "upgrade your ship.   "
+Locate 1, 6, "Default ship -> ф    "
+Locate 1, 7, "+===------*------⋇ F3"
+GetKey = 59 => ClrText
+GetKey = 59 => Goto 6
+Goto 5
+
+
+Lbl 6
+Locate 1, 1, "+===-H T P-===+"
+Locate 1, 2, "Do not get hit by the"
+Locate 1, 3, "meteors, and increase"
+Locate 1, 4, "your score by hitting"
+Locate 1, 5, "meteors->€125 per hit"
+Locate 1, 6, "Default meteors -> ⨯⋇"
+Locate 1, 7, "+===------*------⋇ F4"
+GetKey = 49 => ClrText
+GetKey = 49 => Goto 7
+Goto 6
+
+Lbl 7
+Locate 1, 1, "+===---C---===+"
+Locate 1, 2, "You have 3 hit points"
+Locate 1, 3, "Game is saved in ->  "
+Locate 1, 4, "List 2, Str 3, Mat M "
+Locate 1, 5, " © 2020 by           "
+Locate 1, 6, " AkzidenzGrotesk     "
+Locate 1, 7, "+===------*------⋇ F5"
+GetKey = 39 => ClrText
+GetKey = 39 => Goto 1
+Goto 7
+#End of part
+#Program name: ~GPLAT
+#Password: <no password>
+
+{1200, 3200, 4250, 5350, 7500, 9650, 10800, 15500, 0} -> List 3
+{4,11} -> Dim Mat S
+[[5500, 12000, 0, 0, 0, 0, 0, 0, 0, 0, 0][2000, 4000, 8000, 12000, 15000, 20000, 24000, 28000, 30000, 38000, 0][1200, 4000, 6500, 9000, 10000, 12000, 13000, 14000, 0, 0, 0]] -> Mat S
+1 -> N
+1 -> F
+
+Lbl 1
+Locate 4, 2, "¢ PLATFORM SHOP"
+Locate 1, 1, "€ "
+Locate 3, 1, List 2[4]
+GetKey -> D
+
+' SETUP GENERAL UPGRADES
+"[||]" -> Str 6
+"[||||||||||]" -> Str 7
+"[||||||||]" -> Str 8
+List 2[6] = 1 => "[#|]" -> Str 6
+List 2[6] = 2 => "[##]" -> Str 6
+
+List 2[7] = 1 => "[#|||||||||]" -> Str 7
+List 2[7] = 2 => "[##||||||||]" -> Str 7
+List 2[7] = 3 => "[###|||||||]" -> Str 7
+List 2[7] = 4 => "[####||||||]" -> Str 7
+List 2[7] = 5 => "[#####|||||]" -> Str 7
+List 2[7] = 6 => "[######||||]" -> Str 7
+List 2[7] = 7 => "[#######|||]" -> Str 7
+List 2[7] = 8 => "[########||]" -> Str 7
+List 2[7] = 9 => "[#########|]" -> Str 7
+List 2[7] = 10 => "[##########]" -> Str 7
+
+List 2[8] = 1 => "[#|||||||]" -> Str 8
+List 2[8] = 2 => "[##||||||]" -> Str 8
+List 2[8] = 3 => "[###|||||]" -> Str 8
+List 2[8] = 4 => "[####||||]" -> Str 8
+List 2[8] = 5 => "[#####|||]" -> Str 8
+List 2[8] = 6 => "[######||]" -> Str 8
+List 2[8] = 7 => "[#######|]" -> Str 8
+List 2[8] = 8 => "[########]" -> Str 8
+
+' SETUP BULLET UPGRADES
+"[● ○ ○ ○ ○ ○ ○ ○ ○]" -> Str 4
+"Medium bullet" -> Str 5
+If List 2[3] = 1 : Then 
+	"Reflective bullet" -> Str 5
+	"[● ● ○ ○ ○ ○ ○ ○ ○]" -> Str 4
+	20 -> List 2[5]
+IfEnd
+If List 2[3] = 2 : Then 
+	"Reactor bullet" -> Str 5
+	"[● ● ● ○ ○ ○ ○ ○ ○]" -> Str 4
+	30 -> List 2[5]
+IfEnd
+If List 2[3] = 3 : Then 
+	"Large bullet" -> Str 5
+	"[● ● ● ● ○ ○ ○ ○ ○]" -> Str 4
+	35 -> List 2[5]
+IfEnd
+If List 2[3] = 4 : Then 
+	"Large reflective" -> Str 5
+	"[● ● ● ● ● ○ ○ ○ ○]" -> Str 4
+	55 -> List 2[5]
+IfEnd
+If List 2[3] = 5 : Then 
+	"Double bullet" -> Str 5
+	"[● ● ● ● ● ● ○ ○ ○]" -> Str 4
+	80 -> List 2[5]
+IfEnd
+If List 2[3] = 6 : Then 
+	"Large reactor" -> Str 5
+	"[● ● ● ● ● ● ● ○ ○]" -> Str 4
+	120 -> List 2[5]
+IfEnd
+If List 2[3] = 7 : Then 
+	"Force beam" -> Str 5
+	"[● ● ● ● ● ● ● ● ○]" -> Str 4
+	180 -> List 2[5]
+IfEnd
+If List 2[3] = 8 : Then 
+	"⋇ MAX ⋇" -> Str 5
+	"[● ● ● ● ● ● ● ● ●]" -> Str 4
+	255 -> List 2[5]
+IfEnd
+
+If M = 1 : Then 
+	Locate 1, 3, " Welcome to the Shop"
+	Locate 1, 4, " Use ↔ leftright to "
+	Locate 1, 5, "   navigate items.   "
+	Locate 1, 6, " Use  function keys "
+	Locate 1, 7, "  to navigate menu ⇔▶"
+
+IfEnd
+
+If M = 2 : Then 
+	Locate 1, 3, "       ⇔ SHIPS       "
+
+	D = 27 And N < 6 => N + 1 -> N
+	D = 38 And N > 1 => N - 1 -> N
+
+	If N = 1 : Then 
+		Locate 1, 4, " ф DIAMOND ↔ default"
+		Locate 1, 5, " € FREE"
+		Locate 1, 6, " - "
+		Locate 1, 7, "◀  [● ○ ○ ○ ○ ○]  ∡▶"
+	IfEnd
+
+	If N = 2 : Then 
+		Locate 1, 4, " Σ STIGMA ↔ speed"
+		Locate 1, 5, " € 1500              "
+		Locate 1, 6, "         [|]         "
+		Locate 1, 7, "◀  [○ ● ○ ○ ○ ○]  ∡▶"
+	IfEnd
+
+
+	If N = 3 : Then 
+		Locate 1, 4, " ⇔ C2 ↔ healing"
+		Locate 1, 5, " € 5500"
+		Locate 1, 6, "        [|||]        "
+		Locate 1, 7, "◀  [○ ○ ● ○ ○ ○]  ∡▶"
+	IfEnd
+
+	If N = 4 : Then 
+		Locate 1, 4, " Є Y-Two ↔ +hull"
+		Locate 1, 5, " € 12000"
+		Locate 1, 6, "       [||||]        "
+		Locate 1, 7, "◀  [○ ○ ○ ● ○ ○]  ∡▶"
+	IfEnd
+
+	If N = 5 : Then 
+		Locate 1, 4, " Ф F-Four ↔ damage"
+		Locate 1, 5, " € 20000"
+		Locate 1, 6, "       [||||]        "
+		Locate 1, 7, "◀  [○ ○ ○ ○ ● ○]  ∡▶"
+	IfEnd
+
+	If N = 6 : Then 
+		Locate 1, 4, " § B-Center ↔ meteors"
+		Locate 1, 5, " € 25000"
+		Locate 1, 6, "       [||||]        "
+		Locate 1, 7, "◀  [○ ○ ○ ○ ○ ●]  ∡▶"
+	IfEnd
+
+
+
+
+
+IfEnd
+
+If M = 3 : Then 
+	Locate 1, 3, "        ∡ GUNS       "
+	Locate 2, 4, Str 5
+	Locate 2, 5, "€"
+	Locate 4, 5, List 3[List 2[3]+1]
+	Locate 2, 6, Str 4
+	Locate 1, 7, "◀⇔                 Θ▶"
+
+	If D = 27 And List 2[4] >= List 3[List 2[3]+1] And List 2[3] + 1 < 9: Then
+		List 2[4] - List 3[List 2[3]+1] -> List 2[4]
+		List 2[3] + 1 -> List 2[3]
+	IfEnd
+
+IfEnd
+
+If M = 4 : Then 
+	Locate 1, 3, "      Θ UPGRADES     "
+
+	D = 27 And N < 3 => N + 1 -> N
+	D = 38 And N > 1 => N - 1 -> N
+
+	If D = 31 : Then
+		If N = 1 And List 2[4] > Mat S[1, List 2[6]+1] And List 2[6] < 2 : Then
+			List 2[4] - Mat S[1, List 2[6]+1] -> List 2[4]
+			List 2[6] + 1 -> List 2[6]
+			List 2[6] = 1 => "【◇◇◇◇】" -> Str 3
+			List 2[6] = 2 => "【◇◇◇◇◇】" -> Str 3
+		IfEnd
+
+		If N = 2 And List 2[4] > Mat S[2, List 2[7]+1] And List 2[7] < 10 : Then
+			List 2[4] - Mat S[2, List 2[7]+1] -> List 2[4]
+			List 2[7] + 1 -> List 2[7]
+		IfEnd
+
+		If N = 3 And List 2[4] > Mat S[3, List 2[8]+1] And List 2[8] < 8 : Then
+			List 2[4] - Mat S[3, List 2[8]+1] -> List 2[4]
+			List 2[8] + 1 -> List 2[8]
+		IfEnd
+
+	IfEnd
+
+	If N = 1 : Then
+		Locate 2, 4, "⋇ +1 Max H.P."
+		Locate 2, 5, "€"
+		Locate 4, 5, Mat S[1, List 2[6]+1]
+		Locate 9, 6, Str 6
+		Locate 1, 7, "◀∡     [● ○ ○]     Õ▶"
+	IfEnd
+	
+	If N = 2 : Then
+		Locate 2, 4, "» Damage +10%"
+		Locate 2, 5, "€"
+		Locate 4, 5, Mat S[2, List 2[7]+1]
+		Locate 6, 6, Str 7
+		Locate 1, 7, "◀∡     [○ ● ○]     Õ▶"
+	IfEnd
+	
+	If N = 3 : Then
+		Locate 2, 4, "€ Money +25%"
+		Locate 2, 5, "€"
+		Locate 4, 5, Mat S[3, List 2[8]+1]
+		Locate 7, 6, Str 8
+		Locate 1, 7, "◀∡     [○ ○ ●]     Õ▶"
+	IfEnd
+
+IfEnd
+
+If M = 5 : Then 
+	Locate 1, 3, "       Õ FIXES       "
+	
+	D = 27 And N < 4 => N + 1 -> N
+	D = 38 And N > 1 => N - 1 -> N
+	If D = 31 : Then
+		If N = 1 And List 2[4] >= 210 And Not StrCmp(Str 3, "【◇◇◇】") = 0 And Not StrCmp(Str 3, "【◇◇◇◇】") = 0 And Not StrCmp(Str 3, "【◇◇◇◇◇】") = 0 : Then
+			StrCmp(Str 3, "【◇◆◆】") = 0 => "【◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◆】") = 0 => "【◇◇◇】" -> Str 3
+
+			StrCmp(Str 3, "【◇◆◆◆】") = 0 => "【◇◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◆◆】") = 0 => "【◇◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◆】") = 0 => "【◇◇◇◇】" -> Str 3
+
+			StrCmp(Str 3, "【◇◆◆◆◆】") = 0 => "【◇◇◆◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◆◆◆】") = 0 => "【◇◇◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◆◆】") = 0 => "【◇◇◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◇◆】") = 0 => "【◇◇◇◇◇】" -> Str 3
+			List 2[4] - 210 -> List 2[4]
+		IfEnd
+		If N = 2 And List 2[4] >= 390 And Not StrCmp(Str 3, "【◇◇◇】") = 0 And Not StrCmp(Str 3, "【◇◇◆】") = 0 And Not StrCmp(Str 3, "【◇◇◇◇】") = 0 And Not StrCmp(Str 3, "【◇◇◇◆】") = 0 And Not StrCmp(Str 3, "【◇◇◇◇◇】") = 0 And Not StrCmp(Str 3, "【◇◇◇◇◆】") = 0: Then
+			StrCmp(Str 3, "【◇◆◆】") = 0 => "【◇◇◇】" -> Str 3
+
+			StrCmp(Str 3, "【◇◆◆◆】") = 0 => "【◇◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◆◆】") = 0 => "【◇◇◇◇】" -> Str 3
+
+			StrCmp(Str 3, "【◇◆◆◆◆】") = 0 => "【◇◇◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◆◆◆】") = 0 => "【◇◇◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◆◆】") = 0 => "【◇◇◇◇◇】" -> Str 3
+			List 2[4] - 390 -> List 2[4]
+		IfEnd
+		If N = 3 And List 2[4] >= 550 And StrLen(Str 3) >= 6: Then
+			If StrCmp(Str 3, "【◇◆◆◆】") = 0 Or StrCmp(Str 3, "【◇◆◆◆◆】") = 0 Or StrCmp(Str 3, "【◇◇◆◆◆】") = 0 : Then
+				StrCmp(Str 3, "【◇◆◆◆】") = 0 => "【◇◇◇◇】" -> Str 3
+
+				StrCmp(Str 3, "【◇◆◆◆◆】") = 0 => "【◇◇◇◇◆】" -> Str 3
+				StrCmp(Str 3, "【◇◇◆◆◆】") = 0 => "【◇◇◇◇◇】" -> Str 3
+				List 2[4] - 550 -> List 2[4]
+			IfEnd
+		IfEnd
+		If N = 4 And List 2[4] >= 720 And StrCmp(Str 3, "【◇◆◆◆◆】") = 0: Then
+			StrCmp(Str 3, "【◇◆◆◆◆】") = 0 => "【◇◇◇◇◇】" -> Str 3
+			List 2[4] - 720 -> List 2[4]
+		IfEnd
+	IfEnd
+
+	If N = 1 : Then
+		Locate 1, 4, "    ⋇ Heal 1 H.P.    "
+		Locate 1, 5, "        € 210        "
+		Locate 1, 6, "         [|]         "
+		Locate 1, 7, "◀Θ    [● ○ ○ ○]      "
+	IfEnd
+	
+	If N = 2 : Then
+		Locate 1, 4, " ⋇ Heal 2 H.P.       "
+		Locate 1, 5, " € 390               "
+		Locate 1, 6, "         [|]         "
+		Locate 1, 7, "◀Θ    [○ ● ○ ○]      "
+	IfEnd
+	
+	If N = 3 : Then
+		Locate 1, 4, " ⋇ Heal 3 H.P.       "
+		Locate 1, 5, " € 550               "
+		Locate 1, 6, "         [|]         "
+		Locate 1, 7, "◀Θ    [○ ○ ● ○]      "
+	IfEnd
+	
+	If N = 4 : Then
+		Locate 1, 4, " ⋇ Heal 4 H.P.       "
+		Locate 1, 5, " € 720                "
+		Locate 1, 6, "         [|]         "
+		Locate 1, 7, "◀Θ    [○ ○ ○ ●]      "
+	IfEnd
+
+IfEnd
+
+D = 79 => 1 -> M
+D = 69 => 2 -> M
+D = 59 => 3 -> M
+D = 49 => 4 -> M
+D = 39 => 5 -> M
+D = 47 => Prog "~GALAXY"
+D != 0 => ClrText
+
+
+Goto 1
+
+#End of part

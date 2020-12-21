@@ -1,0 +1,188 @@
+#Program name: ~GPLAT
+#Password: <no password>
+{1200, 3200, 4250, 5350, 7500, 9650, 10800, 15500, 0} -> List 3
+{4, 11} -> Dim Mat S
+[[5500, 12000, 0, 0, 0, 0, 0, 0, 0, 0, 0][2000, 4000, 8000, 12000, 15000, 20000, 24000, 28000, 30000, 38000, 0][1200, 4000, 6500, 9000, 10000, 12000, 13000, 14000, 0, 0, 0]] -> Mat S
+1 -> N
+1 -> F
+Lbl 1
+Locate 4, 2, "¢ PLATFORM SHOP"
+Locate 1, 1, "€ "
+Locate 3, 1, List 2[4]
+GetKey -> D
+' SETUP GENERAL UPGRADES
+"[||]" -> Str 6
+"[||||||||||]" -> Str 7
+"[||||||||]" -> Str 8
+List 2[6] = 1 => "[#|]" -> Str 6
+List 2[6] = 2 => "[##]" -> Str 6
+List 2[7] = 1 => "[#|||||||||]" -> Str 7
+List 2[7] = 2 => "[##||||||||]" -> Str 7
+List 2[7] = 3 => "[###|||||||]" -> Str 7
+List 2[7] = 4 => "[####||||||]" -> Str 7
+List 2[7] = 5 => "[#####|||||]" -> Str 7
+List 2[7] = 6 => "[######||||]" -> Str 7
+List 2[7] = 7 => "[#######|||]" -> Str 7
+List 2[7] = 8 => "[########||]" -> Str 7
+List 2[7] = 9 => "[#########|]" -> Str 7
+List 2[7] = 10 => "[##########]" -> Str 7
+List 2[8] = 1 => "[#|||||||]" -> Str 8
+List 2[8] = 2 => "[##||||||]" -> Str 8
+List 2[8] = 3 => "[###|||||]" -> Str 8
+List 2[8] = 4 => "[####||||]" -> Str 8
+List 2[8] = 5 => "[#####|||]" -> Str 8
+List 2[8] = 6 => "[######||]" -> Str 8
+List 2[8] = 7 => "[#######|]" -> Str 8
+List 2[8] = 8 => "[########]" -> Str 8
+' SETUP BULLET UPGRADES
+"[● ○ ○ ○ ○ ○ ○ ○ ○]" -> Str 4
+"Medium bullet" -> Str 5
+If List 2[3] = 1 : Then "Reflective bullet" -> Str 5
+	"[● ● ○ ○ ○ ○ ○ ○ ○]" -> Str 4
+	20 -> List 2[5]
+IfEnd
+If List 2[3] = 2 : Then "Reactor bullet" -> Str 5
+	"[● ● ● ○ ○ ○ ○ ○ ○]" -> Str 4
+	30 -> List 2[5]
+IfEnd
+If List 2[3] = 3 : Then "Large bullet" -> Str 5
+	"[● ● ● ● ○ ○ ○ ○ ○]" -> Str 4
+	35 -> List 2[5]
+IfEnd
+If List 2[3] = 4 : Then "Large reflective" -> Str 5
+	"[● ● ● ● ● ○ ○ ○ ○]" -> Str 4
+	55 -> List 2[5]
+IfEnd
+If List 2[3] = 5 : Then "Double bullet" -> Str 5
+	"[● ● ● ● ● ● ○ ○ ○]" -> Str 4
+	80 -> List 2[5]
+IfEnd
+If List 2[3] = 6 : Then "Large reactor" -> Str 5
+	"[● ● ● ● ● ● ● ○ ○]" -> Str 4
+	120 -> List 2[5]
+IfEnd
+If List 2[3] = 7 : Then "Force beam" -> Str 5
+	"[● ● ● ● ● ● ● ● ○]" -> Str 4
+	180 -> List 2[5]
+IfEnd
+If List 2[3] = 8 : Then "⋇ MAX ⋇" -> Str 5
+	"[● ● ● ● ● ● ● ● ●]" -> Str 4
+	255 -> List 2[5]
+IfEnd
+If M = 1 : Then Locate 1, 3, " Welcome to the Shop"
+	Locate 1, 4, " Use ↔ leftright to "
+	Locate 1, 5, "   navigate items.   "
+	Locate 1, 6, " Use  function keys "
+	Locate 1, 7, "  to navigate menu ⇔▶"
+IfEnd
+If M = 2 : Then Locate 1, 3, "       ⇔ SHIPS       "
+	Locate 1, 4, "                     "
+	Locate 1, 5, "                     "
+	Locate 1, 6, "                     "
+	Locate 1, 7, "◀                 ∡▶"
+IfEnd
+If M = 3 : Then Locate 1, 3, "        ∡ GUNS       "
+	Locate 2, 4, Str 5
+	Locate 2, 5, "€"
+	Locate 4, 5, List 3[List 2[3] + 1]
+	Locate 2, 6, Str 4
+	Locate 1, 7, "◀⇔                 Θ▶"
+	If D = 27 And List 2[4] >= List 3[List 2[3] + 1] And List 2[3] + 1 < 9 : Then List 2[4] - List 3[List 2[3] + 1] -> List 2[4]
+		List 2[3] + 1 -> List 2[3]
+	IfEnd
+IfEnd
+If M = 4 : Then Locate 1, 3, "      Θ UPGRADES     "
+	D = 27 And N < 3 => N + 1 -> N
+	D = 38 And N > 1 => N - 1 -> N
+	If D = 31 : Then If N = 1 And List 2[4] > Mat S[1, List 2[6] + 1] And List 2[6] < 2 : Then List 2[4] - Mat S[1, List 2[6] + 1] -> List 2[4]
+			List 2[6] + 1 -> List 2[6]
+			List 2[6] = 1 => "【◇◇◇◇】" -> Str 3
+			List 2[6] = 2 => "【◇◇◇◇◇】" -> Str 3
+		IfEnd
+		If N = 2 And List 2[4] > Mat S[2, List 2[7] + 1] And List 2[7] < 10 : Then List 2[4] - Mat S[2, List 2[7] + 1] -> List 2[4]
+			List 2[7] + 1 -> List 2[7]
+		IfEnd
+		If N = 3 And List 2[4] > Mat S[3, List 2[8] + 1] And List 2[8] < 8 : Then List 2[4] - Mat S[3, List 2[8] + 1] -> List 2[4]
+			List 2[8] + 1 -> List 2[8]
+		IfEnd
+	IfEnd
+	If N = 1 : Then Locate 1, 4, "⋇ +1 Max H.P."
+		Locate 2, 5, "€"
+		Locate 4, 5, Mat S[1, List 2[6] + 1]
+		Locate 9, 6, Str 6
+		Locate 1, 7, "◀∡     [● ○ ○]     Õ▶"
+	IfEnd
+	If N = 2 : Then Locate 1, 4, "» Damage +10%"
+		Locate 2, 5, "€"
+		Locate 4, 5, Mat S[2, List 2[7] + 1]
+		Locate 6, 6, Str 7
+		Locate 1, 7, "◀∡     [○ ● ○]     Õ▶"
+	IfEnd
+	If N = 3 : Then Locate 1, 4, "€ Money +25%"
+		Locate 2, 5, "€"
+		Locate 4, 5, Mat S[3, List 2[8] + 1]
+		Locate 7, 6, Str 8
+		Locate 1, 7, "◀∡     [○ ○ ●]     Õ▶"
+	IfEnd
+IfEnd
+If M = 5 : Then Locate 1, 3, "       Õ FIXES       "
+	D = 27 And N < 4 => N + 1 -> N
+	D = 38 And N > 1 => N - 1 -> N
+	If D = 31 : Then If N = 1 And List 2[4] >= 210 And Not StrCmp(Str 3, "【◇◇◇】") = 0 And Not StrCmp(Str 3, "【◇◇◇◇】") = 0 And Not StrCmp(Str 3, "【◇◇◇◇◇】") = 0 : Then StrCmp(Str 3, "【◇◆◆】") = 0 => "【◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◆】") = 0 => "【◇◇◇】" -> Str 3
+			StrCmp(Str 3, "【◇◆◆◆】") = 0 => "【◇◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◆◆】") = 0 => "【◇◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◆】") = 0 => "【◇◇◇◇】" -> Str 3
+			StrCmp(Str 3, "【◇◆◆◆◆】") = 0 => "【◇◇◆◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◆◆◆】") = 0 => "【◇◇◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◆◆】") = 0 => "【◇◇◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◇◆】") = 0 => "【◇◇◇◇◇】" -> Str 3
+			List 2[4] - 210 -> List 2[4]
+		IfEnd
+		If N = 2 And List 2[4] >= 390 And Not StrCmp(Str 3, "【◇◇◇】") = 0 And Not StrCmp(Str 3, "【◇◇◆】") = 0 And Not StrCmp(Str 3, "【◇◇◇◇】") = 0 And Not StrCmp(Str 3, "【◇◇◇◆】") = 0 And Not StrCmp(Str 3, "【◇◇◇◇◇】") = 0 And Not StrCmp(Str 3, "【◇◇◇◇◆】") = 0 : Then StrCmp(Str 3, "【◇◆◆】") = 0 => "【◇◇◇】" -> Str 3
+			StrCmp(Str 3, "【◇◆◆◆】") = 0 => "【◇◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◆◆】") = 0 => "【◇◇◇◇】" -> Str 3
+			StrCmp(Str 3, "【◇◆◆◆◆】") = 0 => "【◇◇◇◆◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◆◆◆】") = 0 => "【◇◇◇◇◆】" -> Str 3
+			StrCmp(Str 3, "【◇◇◇◆◆】") = 0 => "【◇◇◇◇◇】" -> Str 3
+			List 2[4] - 390 -> List 2[4]
+		IfEnd
+		If N = 3 And List 2[4] >= 550 And StrLen(Str 3) >= 6 : Then If StrCmp(Str 3, "【◇◆◆◆】") = 0 Or StrCmp(Str 3, "【◇◆◆◆◆】") = 0 Or StrCmp(Str 3, "【◇◇◆◆◆】") = 0 : Then StrCmp(Str 3, "【◇◆◆◆】") = 0 => "【◇◇◇◇】" -> Str 3
+				StrCmp(Str 3, "【◇◆◆◆◆】") = 0 => "【◇◇◇◇◆】" -> Str 3
+				StrCmp(Str 3, "【◇◇◆◆◆】") = 0 => "【◇◇◇◇◇】" -> Str 3
+				List 2[4] - 550 -> List 2[4]
+			IfEnd
+		IfEnd
+		If N = 4 And List 2[4] >= 720 And StrCmp(Str 3, "【◇◆◆◆◆】") = 0 : Then StrCmp(Str 3, "【◇◆◆◆◆】") = 0 => "【◇◇◇◇◇】" -> Str 3
+			List 2[4] - 720 -> List 2[4]
+		IfEnd
+	IfEnd
+	If N = 1 : Then Locate 1, 4, "    ⋇ Heal 1 H.P.    "
+		Locate 1, 5, "        € 210        "
+		Locate 1, 6, "         [|]         "
+		Locate 1, 7, "◀Θ    [● ○ ○ ○]      "
+	IfEnd
+	If N = 2 : Then Locate 1, 4, "    ⋇ Heal 2 H.P.    "
+		Locate 1, 5, "        € 390        "
+		Locate 1, 6, "         [|]         "
+		Locate 1, 7, "◀Θ    [○ ● ○ ○]      "
+	IfEnd
+	If N = 3 : Then Locate 1, 4, "    ⋇ Heal 3 H.P.    "
+		Locate 1, 5, "        € 550        "
+		Locate 1, 6, "         [|]         "
+		Locate 1, 7, "◀Θ    [○ ○ ● ○]      "
+	IfEnd
+	If N = 4 : Then Locate 1, 4, "    ⋇ Heal 4 H.P.    "
+		Locate 1, 5, "        € 720        "
+		Locate 1, 6, "         [|]         "
+		Locate 1, 7, "◀Θ    [○ ○ ○ ●]      "
+	IfEnd
+IfEnd
+D = 79 => 1 -> M
+D = 69 => 2 -> M
+D = 59 => 3 -> M
+D = 49 => 4 -> M
+D = 39 => 5 -> M
+D = 47 => Prog "~GALAXY"
+D != 0 => ClrText
+Goto 1

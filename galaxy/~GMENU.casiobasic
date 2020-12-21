@@ -1,0 +1,86 @@
+#Program name: ~GMENU
+#Password: <no password>
+ClrText
+RclV-Win 1
+0 -> M
+Lbl 1
+Locate 6, 1, "⇔  ▫    "
+Locate 6, 2, "GALAXY SHOT"
+Locate 4, 3, "≡ How to Play"
+Locate 4, 4, "⇔ New Game"
+Locate 4, 5, "@ Reload Save"
+Locate 4, 6, "* Quit"
+Locate 2, 7, "Use ▷ to select."
+Locate 2, M + 3, "↔"
+GetKey -> Z
+Z = 28 And M > 0 => M - 1 -> M
+Z = 37 And M < 3 => M + 1 -> M
+Z != 0 => ClrText
+If Z = 27 : Then M = 0 => ClrText
+	M = 0 => Goto 3
+	If M = 1 : Then "【◇◇◇】" -> Str 3
+		{6, 8} -> Dim Mat M
+		Fill(0, Mat M)
+		'Score, Ship Display, Bullet Display, Money, Bullet Damage, Bonus HP, Damage + 10%, Money Multiplier
+		{0, 0, 0, 1000, 10, 0, 0, 0} -> List 2
+		Prog "~GALAXY"
+	IfEnd
+	M = 2 => Prog "~GALAXY"
+	M = 3 => Stop
+IfEnd
+Goto 1
+Lbl 3
+Locate 1, 1, "+===-H T P-===+"
+Locate 1, 2, "    Game Controls    "
+Locate 1, 3, "⋇ ARROWS to move ship"
+Locate 1, 4, "  ▲ SHIFT to shoot.  "
+Locate 1, 5, "   ≡ MENU to pause.  "
+Locate 1, 6, " ▷ RIGHT to use menu "
+Locate 1, 7, "+===------*------⋇ F1"
+GetKey = 79 => ClrText
+GetKey = 79 => Goto 4
+Goto 3
+Lbl 4
+Locate 1, 1, "+===-H T P-===+"
+Locate 1, 2, "You have one shot,   "
+Locate 1, 3, "which will return if "
+Locate 1, 4, "it hits a target or  "
+Locate 1, 5, "you shoot again.     "
+Locate 1, 6, "Default bullet -> ·  "
+Locate 1, 7, "+===------*------⋇ F2"
+GetKey = 69 => ClrText
+GetKey = 69 => Goto 5
+Goto 4
+Lbl 5
+Locate 1, 1, "+===-H T P-===+"
+Locate 1, 2, "You cannot go too far"
+Locate 1, 3, "from the platform.   "
+Locate 1, 4, "Return to platform to"
+Locate 1, 5, "upgrade your ship.   "
+Locate 1, 6, "Default ship -> ф    "
+Locate 1, 7, "+===------*------⋇ F3"
+GetKey = 59 => ClrText
+GetKey = 59 => Goto 6
+Goto 5
+Lbl 6
+Locate 1, 1, "+===-H T P-===+"
+Locate 1, 2, "Do not get hit by the"
+Locate 1, 3, "meteors, and increase"
+Locate 1, 4, "your score by hitting"
+Locate 1, 5, "meteors->€125 per hit"
+Locate 1, 6, "Default meteors -> ⨯⋇"
+Locate 1, 7, "+===------*------⋇ F4"
+GetKey = 49 => ClrText
+GetKey = 49 => Goto 7
+Goto 6
+Lbl 7
+Locate 1, 1, "+===---C---===+"
+Locate 1, 2, "You have 3 hit points"
+Locate 1, 3, "Game is saved in ->  "
+Locate 1, 4, "List 2, Str 3, Mat M "
+Locate 1, 5, " © 2020 by           "
+Locate 1, 6, " AkzidenzGrotesk     "
+Locate 1, 7, "+===------*------⋇ F5"
+GetKey = 39 => ClrText
+GetKey = 39 => Goto 1
+Goto 7

@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include "math.h"
 #include "mathf.h"
+// #include "MonoCL.h" // doesn't work with fx-9860gii :( would be faster
 
 unsigned char specChar[3] = {0x8C, 0xCB, 0xCC};
 
@@ -23,9 +24,9 @@ int AddIn_main(int isAppli, unsigned short OptionNum)
 		const int mapWidth = 16;
 		const float fov = 3.14159 / 3.0;
 		const float depth = 16;
-		const float detail = 0.5;
+		const float detail = 0.2;
 
-		int x, y, s;
+		int x, y, s, w;
 		float b;
 		float rayAngle, distanceToWall, eyeX, eyeY;
 		int hitWall, testX, testY;
@@ -36,22 +37,22 @@ int AddIn_main(int isAppli, unsigned short OptionNum)
 		int mul = 1;
 
 		int map[16][16] = {
-		  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-		  {1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-		  {1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1},
-		  {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1},
-		  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+			{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+			{1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1},
+			{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1},
+			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		};
 
 		Bdisp_AllClr_DDVRAM();
@@ -94,48 +95,59 @@ int AddIn_main(int isAppli, unsigned short OptionNum)
 					testY = (int)(playerY + eyeY * distanceToWall);
 
 					if (testX < 0 || testX >= mapWidth || testY < 0 || testY >= mapHeight) {
-		        hitWall = 1;
-		        distanceToWall = depth;
-		      }
-		      else {
-		        if (map[testY][testX] == 1) {
-		          hitWall = 1;
-		        }
-		      }
+						hitWall = 1;
+						distanceToWall = depth;
+					}
+					else {
+						if (map[testY][testX] == 1) {
+							hitWall = 1;
+						}
+					}
 				}
 
 				ceiling = (float)32 - 64 / ((float)distanceToWall);
 				floor = 64 - ceiling;
 
+				// if (distanceToWall < depth / 5.0)		 			w = 1;
+				// else if (distanceToWall < depth / 4.0)		 	w = 2;
+				// else if (distanceToWall < depth / 3.0)			w = 4;
+				// else if (distanceToWall < depth / 2.0)			w = 6;
+				// else if (distanceToWall < depth)						w = 8;
+				// else																				w = 8;
+
 				for (y = 0; y < 64; y++) {
-					if (y < ceiling) Bdisp_SetPoint_VRAM(x,y,0);
+					if (y < ceiling) Bdisp_SetPoint_VRAM(x, y, 0); //ML_pixel(x, y, 0);
 					else if (y >= ceiling && y <= floor) {
-						Bdisp_SetPoint_VRAM(x,y,1);
+						//if ((y + (x % w)) % w == 0) {
+						Bdisp_SetPoint_VRAM(x, y, 1); //ML_pixel(x, y, 1);
+						//} else {
+						//	ML_pixel(x, y, 0);
+						//}
 					}
 					else {
 						b = 1.0 - (((float)y - 32.0) / ((float)64.0));
 						if (b < 0.25) 				s = 7;
-						else if (b < 0.5)   	s = 6;
-						else if (b < 0.65)   	s = 5;
-						else if (b < 0.75)  	s = 4;
-						else if (b < 0.85)   	s = 3;
-						else if (b < 0.9)   	s = 2;
+						else if (b < 0.5)	 	s = 6;
+						else if (b < 0.65)	 	s = 5;
+						else if (b < 0.75)		s = 4;
+						else if (b < 0.85)	 	s = 3;
+						else if (b < 0.9)	 	s = 2;
 						else									s = 2;
 
 						if ((y + (x % s)) % s == 0) {
-		          Bdisp_SetPoint_VRAM(x,y,1);
-		        } else {
-							Bdisp_SetPoint_VRAM(x,y,0);
+							Bdisp_SetPoint_VRAM(x, y, 1); //ML_pixel(x, y, 1);
+						} else {
+							Bdisp_SetPoint_VRAM(x, y, 0); //ML_pixel(x, y, 0);
 						}
 					}
 				}
 			}
 
 			memset(string, 0, 20);
-    	sprintf(string, "%.1f%c %.1f%c %.1f%c", playerX, specChar[1], playerY, specChar[2], playerA, specChar[0]);
+			sprintf(string, "%.1f%c %.1f%c %.1f%c", playerX, specChar[1], playerY, specChar[2], playerA, specChar[0]);
 			PrintMini(0, 0, (unsigned char*)string, MINI_OVER);
 
-			Bdisp_PutDisp_DD();
+			Bdisp_PutDisp_DD(); //ML_display_vram();
 		}
 
 		return 1;
@@ -150,7 +162,7 @@ unsigned long BR_Size;
 
 int InitializeSystem(int isAppli, unsigned short OptionNum)
 {
-    return INIT_ADDIN_APPLICATION(isAppli, OptionNum);
+		return INIT_ADDIN_APPLICATION(isAppli, OptionNum);
 }
 
 #pragma section

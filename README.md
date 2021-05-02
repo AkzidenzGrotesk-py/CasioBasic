@@ -15,3 +15,4 @@ Also, */sdkC/* now contains projects written in C with the Casio fx-9860G SDK, t
 ## Programs
 - **galaxy**, a basic "destroy the asteroids and upgrade your ship" kind of game. It runs very slowly, both because of the high amount of objects, and the inefficiency of the code. The game is unfinished and lacking of ship upgrades, but it's the first game that really showed me you can do some impressive stuff with Casio Basic.
 - **sdkC/Raycast**, A raycasted 3d engine, runs at a *decent* fps, my first attempt with using the Casio fx-9860G SDK.
+- **sdkC/Tetris**, Soviet block game
